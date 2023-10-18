@@ -1,0 +1,57 @@
+version: "3.9"
+
+services:
+
+  rabbitmq:
+    container_name: rabbitmq
+    image: rabbitmq:3.11.3-management
+    restart: always
+    ports:
+      - "5672"
+
+  events:
+    container_name: events
+    build:
+      context: ./events-ms
+      dockerfile: ./Dockerfile
+      target: development
+    restart: always
+    depends_on:
+      - events_pg
+    ports:
+      - "3002:3002"
+
+  events_pg:
+    container_name: events_pg
+    image: postgres:15.2-alpine
+    environment:
+      POSTGRES_DB: events
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+    ports:
+      - "5432"
+    restart: always
+
+  users:
+    container_name: users
+    build:
+      context: ./users
+      dockerfile: ./Dockerfile
+      target: development
+    restart: always
+    depends_on:
+      - users_pg
+    ports:
+      - "3001:3001"
+
+  users_pg:
+    container_name: users_pg
+    image: postgres:15.2-alpine
+    environment:
+      POSTGRES_DB: users
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+    ports:
+      - "5432"
+    restart: always
+
